@@ -3,12 +3,17 @@
 A two-line status line for [Claude Code](https://claude.com/claude-code).
 
 ```
-Opus 5  ·  high  ·  context ██░░░░ 27%              12% ████░░░░   ↻ 20:20
+Opus 5  ·  you@example.com  ·  high  ·  context ██░░░░ 27%    12% ████░░░░   ↻ 20:20
 gojenaya  ·  ⎇ main ✓                    ~/Documents/explorations/my-project
 ```
 
-**Line 1 — Claude:** model, reasoning effort, active subagent, context-window
-usage, 5-hour rate-limit usage, and the time your 5h window resets.
+**Line 1 — Claude:** model, signed-in Claude account, reasoning effort, active
+subagent, context-window usage, 5-hour rate-limit usage, and the time your 5h
+window resets.
+
+The account email comes from the status-line payload when Claude Code supplies
+one, otherwise from `oauthAccount.emailAddress` in `~/.claude.json` (or
+`$CLAUDE_CONFIG_DIR.json`). It's omitted if neither is available.
 
 **Line 2 — Git:** active `gh` account, current branch, working-tree state
 (`+staged ~modified ?untracked`), unpushed/unpulled commit counts, and cwd.

@@ -78,6 +78,16 @@ elif [ -f "$rl_cache" ]; then
     fi
 fi
 
+# Signed-in Claude account — read from the local config, no network call
+claude_account=$(printf '%s' "$input" | jq -r '.account.email // .user.email // empty')
+if [ -z "$claude_account" ]; then
+    for cfg in "${CLAUDE_CONFIG_DIR:-$HOME/.claude}.json" "$HOME/.claude.json"; do
+        [ -f "$cfg" ] || continue
+        claude_account=$(jq -r '.oauthAccount.emailAddress // empty' "$cfg" 2>/dev/null)
+        [ -n "$claude_account" ] && break
+    done
+fi
+
 branch=""
 [ -n "$cwd" ] && branch=$(git -C "$cwd" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null)
 
@@ -133,7 +143,7 @@ spread() {
 SEP_W=5
 
 # ===== Line 1: Claude =====
-# Left:  model  ·  effort  ·  context ██░░░░ 15%
+# Left:  model  ·  account  ·  effort  ·  context ██░░░░ 15%
 # Right: 5h ░░░░░░░░  5%   ↻ 20:20
 
 l1_left="" l1_llen=0
@@ -141,6 +151,10 @@ l1_left="" l1_llen=0
 l1_left+="${blue}${model}${reset}"
 l1_llen=$(( l1_llen + ${#model} ))
 
+if [ -n "$claude_account" ]; then
+    l1_left+="${dim}  ·  ${reset}${pink}${claude_account}${reset}"
+    l1_llen=$(( l1_llen + SEP_W + ${#claude_account} ))
+fi
 if [ -n "$effort" ]; then
     l1_left+="${dim}  ·  ${reset}${effort}"
     l1_llen=$(( l1_llen + SEP_W + ${#effort} ))
